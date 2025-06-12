@@ -29,7 +29,7 @@ func SendSlinChunks(w io.Writer, chunkSize int, input []byte) error {
 			chunkLen = len(input) - i
 		}
 		if _, err := w.Write(SlinMessage(input[i : i+chunkLen])); err != nil {
-			return fmt.Errorf("failted to write chunk to AudioSocket: %w", err)
+			return fmt.Errorf("failed to write chunk to AudioSocket: %w", err)
 		}
 		chunks++
 		i += chunkLen
