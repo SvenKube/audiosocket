@@ -30,6 +30,9 @@ const (
 	// KindSlin indicates the message contains signed-linear audio data
 	KindSlin = 0x10
 
+	// KindSlin indicates that the message contains 16-bit, 16 kbit/s signed-linear audio data
+	KindSlin16 = 0x11
+
 	// KindError indicates the message contains an error code
 	KindError = 0xff
 )
@@ -53,6 +56,38 @@ const (
 	// ErrUnknown indicates that the received error from Asterisk is unknown
 	ErrUnknown = 0xff
 )
+
+// AudioFormat defines codec-specific parameters for audio transmission
+type AudioFormat struct {
+	Kind      Kind
+	ChunkSize int
+}
+
+var (
+	// FormatSlin represents 8kHz signed linear audio format
+	FormatSlin = AudioFormat{
+		Kind:      KindSlin,
+		ChunkSize: 320, // 8000Hz * 20ms * 2 bytes
+	}
+
+	// FormatSlin16 represents 16kHz signed linear audio format
+	FormatSlin16 = AudioFormat{
+		Kind:      KindSlin16,
+		ChunkSize: 640, // 16000Hz * 20ms * 2 bytes
+	}
+)
+
+// AudioFormat returns the AudioFormat for this Kind
+func (k Kind) AudioFormat() (AudioFormat, error) {
+	switch k {
+	case KindSlin:
+		return FormatSlin, nil
+	case KindSlin16:
+		return FormatSlin16, nil
+	default:
+		return AudioFormat{}, fmt.Errorf("unsupported audio format: %d", k)
+	}
+}
 
 // ContentLength returns the length of the payload of the message
 func (m Message) ContentLength() uint16 {
@@ -167,6 +202,20 @@ func SlinMessage(in []byte) Message {
 
 	out := make([]byte, 3, 3+len(in))
 	out[0] = KindSlin
+	binary.BigEndian.PutUint16(out[1:], uint16(len(in)))
+	out = append(out, in...)
+	return out
+}
+
+// AudioMessage creates a new Message from audio data with the specified kind
+// If the input is larger than 65535 bytes, this function will panic.
+func AudioMessage(in []byte, kind Kind) Message {
+	if len(in) > 65535 {
+		panic("audiosocket: message too large")
+	}
+
+	out := make([]byte, 3, 3+len(in))
+	out[0] = byte(kind)
 	binary.BigEndian.PutUint16(out[1:], uint16(len(in)))
 	out = append(out, in...)
 	return out

@@ -9,6 +9,7 @@ There exists a protocol definition (below), a Go library, and Asterisk
 application and channel interfaces.
 
 **NOTE:** [@florentchauveau](https://github.com/florentchauveau) has contributed [DTMF support](https://github.com/asterisk/asterisk/pull/1138) to the AudioSocket protocol. The patch has been merged into `master` and will be included in Asterisk versions 20.X, 21.X, and 22.X.
+**NOTE:** [@SvenKube](https://github.com/SvenKube) has contributed [slin16 support](https://github.com/asterisk/asterisk/pull/1492) to the AudioSocket protocol. The patch has been merged into `master` and will be included in Asterisk versions 20.X, 21.X, 22.X, and 23.X.
 
 ## Protocol definition
 
@@ -26,6 +27,7 @@ indication, for instance, is `0x00 0x00 0x00`.
   - `0x01` - Payload will contain the UUID (16-byte binary representation) for the audio stream
   - `0x03` - Payload is 1 byte (ascii) DTMF (dual-tone multi-frequency) digit
   - `0x10` - Payload is signed linear, 16-bit, 8kHz, mono PCM (little-endian)
+  - `0x11` - Payload is signed linear, 16-bit, 16kHz, mono PCM (little-endian)
   - `0xff` - An error has occurred; payload is the (optional)
     application-specific error code.  Asterisk-generated error codes are listed
     below.
